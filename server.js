@@ -7,8 +7,9 @@ const ejs = require('ejs');
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
-    database: 'events'
+    password: 'root',
+    database: 'events',
+    port: 8889
 });
 const checkTokenMiddleware = require('./check');
 const paypal = require('@paypal/checkout-server-sdk');
@@ -363,14 +364,64 @@ app.get('/api/event/reservations/:id', (req,res) => {
 /* Annuler une réservation*/
 app.get('/api/cancel-reservation/:id', (req, res) => {
     const id = req.params.id;
-    const query = `DELETE from userReservation where userReservationId = ${id}`;
+    const query = `select * from userReservation join user on userReservation.userId = user.userId where userReservationId = ${id}`;
     db.query(query, (err, result) => {
-        if(!err) {
-            res.send({msg: 'nik'})
-        }else {
-            res.send({msg: 'no'})
+        if(result) {
+            result.forEach(resu => {
+                if(resu.paymentId === '0000') {
+                    const query = `DELETE from userReservation where userReservationId = ${id}`;
+                    db.query(query, (err, result) => {
+                    if(!err) {
+                        res.send({msg: 'nik'})
+                    }else {
+                        res.send({msg: 'no'})
+                    }
+                })
+                } else {
+                    const query = `select * from evenement where eventId = ${resu.eventId}`;
+                    db.query(query, (err, val) => {
+                        if(!val) {
+                            console.log(val);
+                            res.send({msg: 'moer'});
+                        } else {
+                            let option = {
+                                from: 'notifications@diasporaevents.com',
+                                to: resu.email,
+                                subject: 'Réservation annulée',
+                                html: '<br><div style="text-align: center;font-weight: 700;background: lightgray;padding: 2em">Bonjour '+ resu.filiation+', <br>Vous avez annulé votre réservation. <br>Nous avons procédé au remboursement de '+val[0].prix+'€ vers votre compte.</div>'
+                            }
+                            transporter.sendMail(option).then(() => {
+                                const request = new paypal.payments.CapturesRefundRequest(resu.paymentId);
+                                // Set the refund request body
+                                request.requestBody({
+                                    amount: {
+                                        value: val[0].prix,
+                                        currency_code: 'USD'
+                                      }
+                                });
+                                // Call the PayPal API to process the refund
+                                payPalClient.execute(request);
+                                const  query = `DELETE FROM userReservation where userReservationId = ${id}`;
+                                db.query(query, (err, r) => {
+                                    if(!err) {
+                                        res.send({msg: 'ok'});
+                                    }
+                                })
+                            }).catch(err => {
+                                res.send({msg: 'error'})
+                            });
+                        }
+                    })
+                    
+                                  
+                              
+                        }
+            })
+        } else {
+                
         }
     })
+    
 });
 
 /* Annuler un évènement*/
@@ -381,6 +432,40 @@ app.get('/api/cancel-event/:id', (req, res) => {
         if(!err) {
             if(result.length > 0) {
                 result.forEach(resu => {
+                    if(resu.paymentId === '0000') {
+                        const query = `select * from evenement where eventId = ${resu.eventId}`;
+                        //const values = [resu];
+                        db.query(query, (err, resp) => {
+                            if(!err) {
+                                const query = `DELETE from evenement where eventId = ${id}`;
+                                db.query(query, (err, re) => {
+                                    if(!err) {
+
+                                        //console.log(resp);
+                                        let option = {
+                                            from: 'notifications@diasporaevents.com',
+                                            to: resu.email,
+                                            subject: 'Votre évènement est annulé',
+                                            html: '<div style="text-align: center;font-weight: 700;background: lightgray;padding: 2em">Bonjour '+ resu.filiation+', <br>Votre évènement ' +'<h1 style="color: green">'+resp[0].titre+'</h1>' + ' vient d\'être annulé par l\'organisateur. <br>Désolé pour la gêne occasionnée.</div>'
+                                    }
+                                    transporter.sendMail(option).then(() => {
+
+                                        const  query = `DELETE FROM userReservation where eventId = ${id}`;
+                                        db.query(query, (err, r) => {
+                                            if(!err) {
+                                                res.send({msg: 'ok'});
+                                            }
+                                        })
+                                        }).catch(err => {
+                                        res.send({msg: 'error'})
+                                        });
+                                    }
+                                })
+
+                            }
+                        })
+                    } else {
+
                     const request = new paypal.payments.CapturesRefundRequest(resu.paymentId);
 
                     // Set the refund request body
@@ -424,7 +509,7 @@ app.get('/api/cancel-event/:id', (req, res) => {
                         }
                     })
 
-
+                }
                 })
             } else {
                 const  query = `DELETE FROM evenement where eventId = ${id}`;
@@ -456,13 +541,48 @@ app.post('/api/refund', async (req, res) => {
 
         // Handle the refund response and update your database or perform other necessary actions
 
-        res.status(200).json({ message: 'Refund processed successfully', response });
+        res.status(200).json({ msg: 'Ref', response });
     } catch (error) {
         //console.error(error);
-        res.status(500).json({ error: 'Failed to process refund' });
+        res.status(500).json({ error: error});
     }
 });
 
+/* Archiver un évènement*/
+app.post('/api/archive-event', (req, res) => {
+    const query = `INSERT INTO archivedEvent (eventId, userId, titre, lieu, dateStart, dateEnd, hourStart, hourEnd, codePostal, ville, image, description, prix, place, statut) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const {eventId, userId, titre, lieu, dateStart, dateEnd, hourStart, hourEnd, codePostal, ville, image, description, prix, place, statut} = req.body;
+    const values = [eventId, userId, titre, lieu, new Date(dateStart), new Date(dateEnd), hourStart, hourEnd, codePostal, ville, image, description, prix, place, statut];
+    db.query(query, values, (err, result) => {
+        if(result) {
+            const query = `DELETE FROM evenement WHERE eventId = ${eventId}`;
+            db.query(query, (err, resu) => {
+                if(!err) {
+                    res.send({msg: 'in'});
+                }
+            })
+        
+        } else {
+            res.send({msg: err});
+        }
+    })
+})
+
+/*Me contacter */
+app.post('/api/contact', (req, res) => {
+    const {filiation, objet, email, message} = req.body;
+    let option = {
+        from: email,
+        to: 'diasporaeventsdevlinkor@gmail.com',
+        subject: objet,
+        html: '<div style="text-align: center;font-weight: 700;background: lightgray;padding: 2em">Bonjour, je m\'appelle '+ filiation + '<br>' + message +'</div>'
+        }
+    transporter.sendMail(option).then(() => {
+        res.send({msg: 'se'});
+    }).catch(err => {
+    res.send({msg: 'error'})
+    });
+})
 app.listen(process.env.SERVER_PORT, () => {
     console.log(`server is running on port `+process.env.SERVER_PORT);
 })
