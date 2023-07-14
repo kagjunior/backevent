@@ -7,9 +7,9 @@ const ejs = require('ejs');
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'root',
+    password: '',
     database: 'events',
-    port: 8889
+    //port: 8889
 });
 const checkTokenMiddleware = require('./check');
 const paypal = require('@paypal/checkout-server-sdk');
@@ -39,7 +39,8 @@ const config = {
 }
 const transporter = nodemailer.createTransport(config);
 const payPalClient = new paypal.core.PayPalHttpClient(
-    new paypal.core.SandboxEnvironment('AfPek3LvUk6PMMcDNgZrKaw_y3jfWwxVdaqQ5FvWbias1F29Qi9-iDol0gwpXFQSsKRSwMUErhwghdjL', 'EHiyoioqRFeVKcu2Gpz1PLdDtkQwxuWsslTSfC8VwWaUEyRciPpYMUw1DYdGdec5xwRFufNAAZ4CXszT')
+    new paypal.core.SandboxEnvironment('AWjlTwG3OaW5_HKENvhJRL-6Bv-c9Tl9jOpCNq9pTIDzMN9sz73Y3hqWdq-INn4ydVqfxHiMGie6QHQs', 'EG36EzueGq407O3aNM6fBoV13JEvkopaPo5TEU7JhxjyZD-tZyR1_vyBKSzVw7H6W8gVQFiwaseuh8UU')
+   // localhost: new paypal.core.SandboxEnvironment('AfPek3LvUk6PMMcDNgZrKaw_y3jfWwxVdaqQ5FvWbias1F29Qi9-iDol0gwpXFQSsKRSwMUErhwghdjL', 'EHiyoioqRFeVKcu2Gpz1PLdDtkQwxuWsslTSfC8VwWaUEyRciPpYMUw1DYdGdec5xwRFufNAAZ4CXszT')
 );
 app.use(cors({
     origin: 'http://localhost:4200'
@@ -227,7 +228,7 @@ app.post('/api/event/add-event', (req,res) => {
     const {userId, titre, lieu, dateStart, dateEnd, hourStart, hourEnd, codePostal, ville, image, description, prix, place, statut} = req.body;
     const query = `SELECT * FROM evenement WHERE userId = ${userId} ORDER BY eventId DESC LIMIT 1`;
     db.query(query, (err, result) => {
-        if(result.length === 0 || result[0].statut === 1 || result[0].statut === -1) {
+        if(result) {
             const query = `INSERT INTO evenement (userId, titre, lieu, dateStart, dateEnd, hourStart, hourEnd, codePostal, ville, image, description, prix, place, statut) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
             const values = [userId, titre, lieu, dateStart, dateEnd, hourStart, hourEnd, codePostal, ville, image, description, prix, place, statut];
             db.query(query, values, (err,result) => {
@@ -484,7 +485,12 @@ app.get('/api/cancel-event/:id', (req, res) => {
                             const query = `DELETE from evenement where eventId = ${id}`;
                             db.query(query, (err, re) => {
                                 if(!err) {
-
+                                    const  query = `DELETE FROM userReservation where eventId = ${id}`;
+                                    db.query(query, (err, r) => {
+                                        if(!err) {
+                                            res.send({msg: 'ok'});
+                                        }
+                                    })
                                     //console.log(resp);
                                     let option = {
                                         from: 'notifications@diasporaevents.com',
@@ -493,13 +499,6 @@ app.get('/api/cancel-event/:id', (req, res) => {
                                         html: '<br><div style="text-align: center;font-weight: 700;background: lightgray;padding: 2em">Bonjour '+ resu.filiation+', <br>Votre évènement ' +'<h1 style="color: green">'+resp[0].titre+'</h1>' + ' vient d\'être annulé par l\'organisateur. <br>Nous avons procédé au remboursement de votre paiement. <br>Désolé pour la gêne occasionnée.</div>'
                                     }
                                     transporter.sendMail(option).then(() => {
-
-                                        const  query = `DELETE FROM userReservation where eventId = ${id}`;
-                                        db.query(query, (err, r) => {
-                                            if(!err) {
-                                                res.send({msg: 'ok'});
-                                            }
-                                        })
                                     }).catch(err => {
                                         res.send({msg: 'error'})
                                     });
