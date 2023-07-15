@@ -5,12 +5,14 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const ejs = require('ejs');
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'events',
+    host: 'eu-cdbr-west-03.cleardb.net',
+    user: 'b3f8b85c8998c9',
+    password: '157229c6',
+    database: 'heroku_e027712250de33c',
     //port: 8889
 });
+const PORT = 8890
+//mysql://b3f8b85c8998c9:157229c6@eu-cdbr-west-03.cleardb.net/heroku_e027712250de33c?reconnect=true
 const checkTokenMiddleware = require('./check');
 const paypal = require('@paypal/checkout-server-sdk');
 db.connect(function (error) {
@@ -39,8 +41,10 @@ const config = {
 }
 const transporter = nodemailer.createTransport(config);
 const payPalClient = new paypal.core.PayPalHttpClient(
-    new paypal.core.SandboxEnvironment('AWjlTwG3OaW5_HKENvhJRL-6Bv-c9Tl9jOpCNq9pTIDzMN9sz73Y3hqWdq-INn4ydVqfxHiMGie6QHQs', 'EG36EzueGq407O3aNM6fBoV13JEvkopaPo5TEU7JhxjyZD-tZyR1_vyBKSzVw7H6W8gVQFiwaseuh8UU')
-   // localhost: new paypal.core.SandboxEnvironment('AfPek3LvUk6PMMcDNgZrKaw_y3jfWwxVdaqQ5FvWbias1F29Qi9-iDol0gwpXFQSsKRSwMUErhwghdjL', 'EHiyoioqRFeVKcu2Gpz1PLdDtkQwxuWsslTSfC8VwWaUEyRciPpYMUw1DYdGdec5xwRFufNAAZ4CXszT')
+  //LIVE  
+  //new paypal.core.SandboxEnvironment('AWjlTwG3OaW5_HKENvhJRL-6Bv-c9Tl9jOpCNq9pTIDzMN9sz73Y3hqWdq-INn4ydVqfxHiMGie6QHQs', 'EG36EzueGq407O3aNM6fBoV13JEvkopaPo5TEU7JhxjyZD-tZyR1_vyBKSzVw7H6W8gVQFiwaseuh8UU')
+  //SANDBOX
+  new paypal.core.SandboxEnvironment('ARHAQlWzPGzXADFSjuvlG_KERv14IdT8cM--wFSwlAOZ6nmGH-sEOhq8iuNHBrkwPiSz4MBLGwwZDg1A', 'ECjh-fkIFrLfkPrWQecf0qLb5XiXCGDpIURHhtMmWQYOmjfdl9CLerxw7DRFn1BJMPgvUgEaUT0SEvUB')
 );
 app.use(cors({
     origin: 'http://localhost:4200'
@@ -582,6 +586,6 @@ app.post('/api/contact', (req, res) => {
     res.send({msg: 'error'})
     });
 })
-app.listen(process.env.SERVER_PORT, () => {
-    console.log(`server is running on port `+process.env.SERVER_PORT);
+app.listen(process.env.PORT || PORT , () => {
+    console.log(`server is running on port `+ PORT);
 })
