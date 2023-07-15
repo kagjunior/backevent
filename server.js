@@ -586,6 +586,6 @@ app.post('/api/contact', (req, res) => {
     res.send({msg: 'error'})
     });
 })
-app.listen(process.env.PORT || PORT , () => {
-    console.log(`server is running on port `+ PORT);
+app.listen(process.env.PORT || 8890 , () => {
+    console.log(`server is running on port `+ process.env.PORT);
 })
