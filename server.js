@@ -47,7 +47,7 @@ const payPalClient = new paypal.core.PayPalHttpClient(
   //new paypal.core.SandboxEnvironment('ARHAQlWzPGzXADFSjuvlG_KERv14IdT8cM--wFSwlAOZ6nmGH-sEOhq8iuNHBrkwPiSz4MBLGwwZDg1A', 'ECjh-fkIFrLfkPrWQecf0qLb5XiXCGDpIURHhtMmWQYOmjfdl9CLerxw7DRFn1BJMPgvUgEaUT0SEvUB')
 );
 app.use(cors({
-    origin: 'https://diasporaevents-3781f.web.app'
+    origin: ['https://diasporaevents-3781f.web.app', 'https://diasporaevents-3781f.web.app/home']
 }));
 app.use(express.json());
 app.set('view engine', 'ejs');
