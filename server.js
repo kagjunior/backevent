@@ -84,7 +84,7 @@ app.post('/api/login', (req, res) => {
                             adresse: result[0].adresse,
                             ville: result[0].ville,
                             telephone: result[0].telephone
-                        }, process.env.JWT_SECRET,{expiresIn: '1h'})
+                        }, `${process.env.JWT_SECRET}`,{expiresIn: '1h'})
                         res.send({access_token: token});
                     } else {
                         res.send({message: 'wordError'});
