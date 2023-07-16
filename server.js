@@ -49,7 +49,8 @@ const payPalClient = new paypal.core.PayPalHttpClient(
 app.use(cors({
     origin: ['https://diasporaevents-3781f.web.app', 
              'https://diasporaevents-3781f.web.app/home', 
-             'https://diasporaevents-3781f.web.app/login']
+             'https://diasporaevents-3781f.web.app/login',
+             'https://diasporaevents-03872cd5beb2.herokuapp.com/api/event/add-event']
 }));
 app.use(express.json());
 app.set('view engine', 'ejs');
@@ -108,7 +109,7 @@ app.post('/api/forgotPassword', (req,res) => {
                     from: 'diasporaevents62@gmail.com',
                     to: result[0].email,
                     subject: 'Votre mot de passe oublié',
-                    html: '<br><p> Cliquez <a href="http://localhost:4200/init-password">ici</a> pour re-initialiser votre mot de passe.</p>'
+                    html: '<br><p> Cliquez <a href="https://diasporaevents-3781f.web.app/init-password">ici</a> pour re-initialiser votre mot de passe.</p>'
                 }
                 transporter.sendMail(option).then(() => {
                     res.send({id: result[0].userId})
