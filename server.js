@@ -42,7 +42,7 @@ const config = {
 const transporter = nodemailer.createTransport(config);
 const payPalClient = new paypal.core.PayPalHttpClient(
   //LIVE  
-  new paypal.core.SandboxEnvironment('AWjlTwG3OaW5_HKENvhJRL-6Bv-c9Tl9jOpCNq9pTIDzMN9sz73Y3hqWdq-INn4ydVqfxHiMGie6QHQs', 'EG36EzueGq407O3aNM6fBoV13JEvkopaPo5TEU7JhxjyZD-tZyR1_vyBKSzVw7H6W8gVQFiwaseuh8UU')
+  new paypal.core.LiveEnvironment('AWjlTwG3OaW5_HKENvhJRL-6Bv-c9Tl9jOpCNq9pTIDzMN9sz73Y3hqWdq-INn4ydVqfxHiMGie6QHQs', 'EG36EzueGq407O3aNM6fBoV13JEvkopaPo5TEU7JhxjyZD-tZyR1_vyBKSzVw7H6W8gVQFiwaseuh8UU')
   //SANDBOX
   //new paypal.core.SandboxEnvironment('ARHAQlWzPGzXADFSjuvlG_KERv14IdT8cM--wFSwlAOZ6nmGH-sEOhq8iuNHBrkwPiSz4MBLGwwZDg1A', 'ECjh-fkIFrLfkPrWQecf0qLb5XiXCGDpIURHhtMmWQYOmjfdl9CLerxw7DRFn1BJMPgvUgEaUT0SEvUB')
 );
