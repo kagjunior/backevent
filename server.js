@@ -5,10 +5,10 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const ejs = require('ejs');
 const db = mysql.createConnection({
-    host: 'eu-cdbr-west-03.cleardb.net',
-    user: 'b3f8b85c8998c9',
-    password: '157229c6',
-    database: 'heroku_e027712250de33c',
+    host: 'b0akdrl7qt27yak0dkwm-mysql.services.clever-cloud.com',
+    user: 'u1vzhe8a0txyh7pp',
+    password: '5lZfphVPkMk1H5uovYFw',
+    database: 'b0akdrl7qt27yak0dkwm',
     //port: 8889
 });
 const PORT = 8890
