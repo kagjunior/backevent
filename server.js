@@ -52,6 +52,9 @@ app.use(cors({
              'https://diasporaevents-3781f.web.app/login',
              'https://diasporaevents-03872cd5beb2.herokuapp.com/api/event/add-event']
 }));
+const bodyParser = require('body-parser');
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
