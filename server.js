@@ -5,10 +5,10 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const ejs = require('ejs');
 const db = mysql.createConnection({
-    host: 'eu-cdbr-west-03.cleardb.net',
-    user: 'b3f8b85c8998c9',
-    password: '157229c6',
-    database: 'heroku_e027712250de33c',
+    host: 'b0akdrl7qt27yak0dkwm-mysql.services.clever-cloud.com',
+    user: 'u1vzhe8a0txyh7pp',
+    password: '5lZfphVPkMk1H5uovYFw',
+    database: 'b0akdrl7qt27yak0dkwm',
     //port: 8889
 });
 const PORT = 8890
@@ -399,19 +399,9 @@ app.get('/api/cancel-reservation/:id', (req, res) => {
                                 from: 'notifications@diasporaevents.com',
                                 to: resu.email,
                                 subject: 'Réservation annulée',
-                                html: '<br><div style="text-align: center;font-weight: 700;background: lightgray;padding: 2em">Bonjour '+ resu.filiation+', <br>Vous avez annulé votre réservation. <br>Nous avons procédé au remboursement de '+val[0].prix+'€ vers votre compte.</div>'
+                                html: '<br><div style="text-align: center;font-weight: 700;background: lightgray;padding: 2em">Bonjour '+ resu.filiation+', <br>Vous avez annulé votre réservation. <br></div>'
                             }
                             transporter.sendMail(option).then(() => {
-                                const request = new paypal.payments.CapturesRefundRequest(resu.paymentId);
-                                // Set the refund request body
-                                request.requestBody({
-                                    amount: {
-                                        value: val[0].prix,
-                                        currency_code: 'USD'
-                                      }
-                                });
-                                // Call the PayPal API to process the refund
-                                payPalClient.execute(request);
                                 const  query = `DELETE FROM userReservation where userReservationId = ${id}`;
                                 db.query(query, (err, r) => {
                                     if(!err) {
@@ -476,18 +466,6 @@ app.get('/api/cancel-event/:id', (req, res) => {
                             }
                         })
                     } else {
-
-                    const request = new paypal.payments.CapturesRefundRequest(resu.paymentId);
-
-                    // Set the refund request body
-                    request.requestBody({});
-
-                    // Call the PayPal API to process the refund
-                    payPalClient.execute(request);
-                    //console.log(response);
-                    // Handle the refund response and update your database or perform other necessary actions
-
-                    //res.status(200).json({ message: 'Refund processed successfully', response });
                     const query = `select * from evenement where eventId = ${resu.eventId}`;
                     //const values = [resu];
                     db.query(query, (err, resp) => {
@@ -535,7 +513,7 @@ app.get('/api/cancel-event/:id', (req, res) => {
 });
 
 // Refund endpoint
-app.post('/api/refund', async (req, res) => {
+/* app.post('/api/refund', async (req, res) => {
     try {
         const { orderId } = req.body;
 
@@ -555,7 +533,7 @@ app.post('/api/refund', async (req, res) => {
         //console.error(error);
         res.status(500).json({ error: error});
     }
-});
+});*/
 
 /* Archiver un évènement*/
 app.post('/api/archive-event', (req, res) => {
